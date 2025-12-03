@@ -2,14 +2,16 @@ let input = (await Bun.file("./inputs/day3_input.txt").text())
 	.split("\n")
 	.filter((x) => x != "");
 
-const result = input.reduce((acc, current) => {
-	let result = FindHighestJoltage(current, 12);
-	console.log(result);
-	acc += result;
-	return acc;
-}, 0);
+console.log(Result(true));
+console.log(Result(false));
 
-console.log(result);
+function Result(isPart1: boolean): number {
+	return input.reduce((acc, current) => {
+		let result = FindHighestJoltage(current, isPart1 ? 2 : 12);
+		acc += result;
+		return acc;
+	}, 0);
+}
 
 function FindHighestJoltage(input: String, amountOfCells: number): number {
 	let numbers = input.split("").map((x) => parseInt(x));
