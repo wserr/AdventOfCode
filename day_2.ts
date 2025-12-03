@@ -16,8 +16,7 @@ function Result(isPart1: boolean): number {
 }
 
 function GetRowItem(input: String): [number, number] {
-	const regex = /\d+/g;
-	let items = input.match(regex)!;
+	let items = input.match(/\d+/g)!;
 	return [parseInt(items[0]!), parseInt(items[1]!)];
 }
 
@@ -33,8 +32,7 @@ function FindInvalidIds(lowerLimit: number, upperLimit: number, isPart1: boolean
 
 function IsInvalidId(input: number, isPart1: boolean): boolean {
 	let inputString = input.toString();
-	const regex = isPart1 ? /(^\d*)(\1)$/gm : /(^\d*)(\1+)$/gm;
-	let items = inputString.match(regex);
+	let items = inputString.match(isPart1 ? /(^\d*)(\1)$/gm : /(^\d*)(\1+)$/gm);
 	let result = (items != null && items[0].toString() === inputString);
 	return result;
 }
