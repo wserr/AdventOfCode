@@ -56,25 +56,37 @@ function IsIncludedInInventory(ingredientId: number, inventory: [number, number]
 function OptimizeInventory(inventory: [number, number][]): [number, number][] {
 	let result: [number, number][] = JSON.parse(JSON.stringify(inventory));
 
+	for (const item of result.filter(i => i[0]! === i[1]!)) {
+		result.splice(result.indexOf(item), 1);
+	}
+
 	// Find ranges that lie entirely within other ranges
 	//
-	for (let item of inventory) {
-		const duplicateRange = inventory.find(r => r[0]! >= item[0]! && r[1]! <= item[1]! && ((r[0]!) != item[0]! || item[1]! != r[1]!));
+	for (let item of result) {
+		const inventoryWithoutCurrentItem = result.filter(i => i[0]! != item[0!] && i[1]! != item[1]!);
+		const duplicateRange = inventoryWithoutCurrentItem.find(r => r[0]! >= item[0]! && r[1]! <= item[1]!);
 		if (duplicateRange) {
 			result.splice(result.indexOf(duplicateRange), 1);
 		}
 	}
 
-	// Partly overlapping ranges
-	// No overlapping ranges found
-	//for (let item of inventory) {
-	//	const overlappingRanges = inventory.find(r => (((item[0]! <= r[0]! && item[0]! > r[1]!) || (item[1]! >= r[0]! && item[1]! <= r[0]!)) && ((r[0]!) != item[0]! || item[1]! != r[1]!)));
-	//	if (overlappingRanges) {
-	//		console.log(item);
-	//		console.log(overlappingRanges);
-	//		console.log("");
-	//	}
-	//}
+	for (let item of result) {
+		let followingItem = result.find(i => i[0]! === item[1!]);
+		if (followingItem) {
+			result[result.indexOf(followingItem)] = [followingItem[0]! + 1, followingItem[1]!];
+		}
+	}
+
+	// Find overlapping ranges
+	for (let item of result) {
+		const inventoryWithoutCurrentItem = result.filter(i => i[0]! != item[0!] && i[1]! != item[1]!);
+		let overlappingItems = inventoryWithoutCurrentItem.filter(i => item[0]! >= i[0]! && item[0]! <= i[1]!);
+		for (const item2 of overlappingItems)
+		{
+			result[result.indexOf(item)] = [item[0]! + 1, item2[1]!];
+		}
+	}
+
 
 	return result
 }
