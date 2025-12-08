@@ -32,7 +32,6 @@ function Result(isPart1: boolean): number {
 
 	}
 	else {
-		inventory.sort((a, b) =>  (b[1]! - b[0]!) - (a[1]! - a[0!]));
 		let optimizedInventory: [number, number][] = inventory.reduce((acc: [number, number][], curr) => {
 			FindOverlaps(acc, curr);
 			return acc;
@@ -52,6 +51,8 @@ function IsIncludedInInventory(ingredientId: number, inventory: [number, number]
 }
 
 function FindOverlaps(ranges: [number, number][], input: [number, number]): [number, number][] {
+	// First, sort ranges so largest ranges are handled first
+	ranges.sort((a, b) =>  (b[1]! - b[0]!) - (a[1]! - a[0!]));
 	let result: [number, number][] = [];
 	let existingOverlap = ranges
 		.find(r => (input[0]! >= r[0]! && input[0]! <= r[1]!) || (input[1]! >= r[0]! && input[1]! <= r[1]!));
