@@ -60,7 +60,7 @@ function FindOverlaps(ranges: [number, number][], input: [number, number]): [num
 		// If it falls entirely within range, dont push it
 		if (input[0]! >= existingOverlap[0]! && input[1]! <= existingOverlap[1]!) return [];
 
-		// If input start range is below start range of existing, create new interval starting form input start until existing start -1
+		// If input start range is below start range of existing, create new interval starting from input start until existing start -1
 		if (input[0]! < existingOverlap[0]!) {
 			const proposedValue: [number, number] = [input[0]!, existingOverlap[0]! - 1];
 			FindOverlaps(ranges, proposedValue).forEach(v => {
