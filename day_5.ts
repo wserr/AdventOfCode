@@ -1,7 +1,7 @@
 let ingredients: number[] = [];
 let inventory: [number, number][] = [];
 
-(await Bun.file("./inputs/day5_test.txt").text())
+(await Bun.file("./inputs/day5_input.txt").text())
 	.split("\n")
 	.forEach(l => {
 		let inventoryRegex = /(\d+)-(\d+)/;
@@ -20,9 +20,8 @@ let inventory: [number, number][] = [];
 
 	});
 
-//console.log(Result(true));
+console.log(Result(true));
 console.log(Result(false));
-
 
 function Result(isPart1: boolean): number {
 	if (isPart1) {
@@ -33,18 +32,13 @@ function Result(isPart1: boolean): number {
 
 	}
 	else {
-		let inv = OptimizeInventory(inventory);
-		console.log(inv);
-		//console.log(inv.length);
-		//return CalculateAllFreshIngredients(inv);
-		return 0;
+		inventory.sort((a, b) =>  (b[1]! - b[0]!) - (a[1]! - a[0!]));
+		let optimizedInventory: [number, number][] = inventory.reduce((acc: [number, number][], curr) => {
+			FindOverlaps(acc, curr);
+			return acc;
+		}, []);
+		return optimizedInventory.reduce((acc, curr) => acc += (curr[1]! - curr[0]! + 1), 0);
 	}
-}
-
-function CalculateAllFreshIngredients(inventory: [number, number][]): number {
-	return inventory.reduce((acc, curr) => {
-		return acc + (curr[1]! - curr[0]! + 1);
-	}, 0);
 }
 
 function IsIncludedInInventory(ingredientId: number, inventory: [number, number][]) {
@@ -57,40 +51,34 @@ function IsIncludedInInventory(ingredientId: number, inventory: [number, number]
 	}, false);
 }
 
-function OptimizeInventory(inventory: [number, number][]): [number, number][] {
-	// 1. If result lies entirely within another result, omit
-	// 2. If overlap: modify start/end so items do not overlap
-	return inventory.reduce((acc: [number, number][], curr) => {
-		// 1: Result lies entirely within already existing
-		if (acc.find(item => item[0]! >= curr[0]! && item[1] <= curr[1]!)) return acc;
+function FindOverlaps(ranges: [number, number][], input: [number, number]): [number, number][] {
+	let result: [number, number][] = [];
+	let existingOverlap = ranges
+		.find(r => (input[0]! >= r[0]! && input[0]! <= r[1]!) || (input[1]! >= r[0]! && input[1]! <= r[1]!));
+	if (existingOverlap) {
+		// If it falls entirely within range, dont push it
+		if (input[0]! >= existingOverlap[0]! && input[1]! <= existingOverlap[1]!) return [];
 
-		// 2: overlap at the start; e.g. 2-10 and 1-5
-		const overlapStart = acc.find(item => item[1]! >= curr[0]! && item[1]! <= curr[1]!);
-		const overlapEnd = acc.find(item => item[0]! <= curr[1]! && item[0]! >= curr[0]!);
+		// If input start range is below start range of existing, create new interval starting form input start until existing start -1
+		if (input[0]! < existingOverlap[0]!) {
+			const proposedValue: [number, number] = [input[0]!, existingOverlap[0]! - 1];
+			FindOverlaps(ranges, proposedValue).forEach(v => {
+				result.push(v);
+			});
+		}
 
-		if (overlapStart || overlapEnd) {
-			if (overlapStart) {
-				console.log("Overlap Start");
-				let result: [number, number] = [overlapStart[1]! + 1, curr[1]!];
-				acc.push(result);
-				console.log(overlapStart);
-				console.log(curr);
-				console.log(result);
-				console.log("");
-			}
-			if (overlapEnd) {
-				let result : [number, number] = [curr[0]!, overlapEnd[0]! - 1];
-				console.log("Overlap End");
-				acc.push(result);
-				console.log(overlapEnd);
-				console.log(curr);
-				console.log(result);
-				console.log("");
-			}
+		// If input end range is above end range of existing, create new interval starting from existing + 1 until input end range
+		if (input[1]! > existingOverlap[1]!) {
+			const proposedValue: [number, number] = [existingOverlap[1]! + 1, input[1]!];
+			FindOverlaps(ranges, proposedValue).forEach(v => {
+				result.push(v);
+			});
 		}
-		else {
-			acc.push([curr[0]!, curr[1]!]);
-		}
-		return acc;
-	}, []);
+
+		return ranges;
+	}
+	else {
+		ranges.push(input);
+	}
+	return result;
 }
